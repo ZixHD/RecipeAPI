@@ -38,8 +38,10 @@ public class User {
 
     //Developer
     private String apiKey;
+    private String apiSecret;
     private LocalDateTime apiKeyCreatedAt;
     private boolean apiKeyActive;
+    private String allowedDomains;
 
 
 

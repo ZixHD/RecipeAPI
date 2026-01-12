@@ -37,6 +37,8 @@ public class PostRecipeService {
 
     //TODO: Need to add all recipe methods here
 
+    //pristup sa razlicitih adresa, servisa, sa odredjenog domena za api key je bezan domen
+    //generalno koja je logika iza toga, ko se kaci preko kljuca, jer bi inace svako sa kljucem mogao da se nakaci i da svi dele kljuceve
 
     public List<Map<String, Object>> getSpecificRecipesExclude(String exclude) {
         Set<String> excludedFields = exclude != null
@@ -249,7 +251,7 @@ public class PostRecipeService {
         return currentUser.getId();
     }
 
-    // Example mapping function
+
     private RecipeDto getRecipeData(PostRecipe postRecipe) {
         RecipeDto dto = new RecipeDto();
         dto.setTitle(postRecipe.getTitle());

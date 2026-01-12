@@ -9,9 +9,7 @@ import lombok.RequiredArgsConstructor;
 @AllArgsConstructor
 public class ClientRegisterResponseDto {
 
-    private String id;
-    private String email;
-    private String username;
     private String apiKey;
+    private String apiSecret;
     private String message;
 }
