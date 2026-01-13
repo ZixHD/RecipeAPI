@@ -66,7 +66,7 @@ public class AuthService {
             throw new RuntimeException("Email already registered");
         }
         String generatedApiKey = apiKeyService.generateApiKey();
-        String generatedApiSecret = apiKeyService.generateApiSecret(generatedApiKey, clientRegisterRequestDto.getPassword());
+        String generatedApiSecret = apiKeyService.generateApiSecret();
         User developer = new User();
         developer.setEmail(clientRegisterRequestDto.getEmail());
         developer.setUsername(clientRegisterRequestDto.getUsername());

@@ -17,7 +17,7 @@ bin/
 !**/src/main/**/bin/
 !**/src/test/**/bin/
 .env
-
+dump.rdb
 ### IntelliJ IDEA ###
 .idea
 *.iws
