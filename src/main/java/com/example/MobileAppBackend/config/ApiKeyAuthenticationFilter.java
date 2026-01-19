@@ -15,6 +15,12 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.security.KeyFactory;
+import java.security.PublicKey;
+import java.security.Signature;
+import java.security.spec.X509EncodedKeySpec;
+import java.util.Base64;
 import java.util.Collections;
 import java.util.Optional;
 
@@ -32,8 +38,8 @@ public class ApiKeyAuthenticationFilter extends OncePerRequestFilter {
         String apiKey = request.getHeader("X-API-Key");
         String origin = request.getHeader("Origin");
         String signature = request.getHeader("X-Signature");
-        String nonce = request.getHeader("X-Nonce");
-        String timestamp = request.getHeader("X-Timestamp");
+//        String nonce = request.getHeader("X-Nonce");
+//        String timestamp = request.getHeader("X-Timestamp");
 
 
 
@@ -55,18 +61,17 @@ public class ApiKeyAuthenticationFilter extends OncePerRequestFilter {
                                     Collections.singletonList(authority)
                             );
                     SecurityContextHolder.getContext().setAuthentication(auth);
-                    String dataToSign = apiKey + "\n" + timestamp + "\n" + nonce + "\n" + request.getMethod() + "\n" + request.getRequestURI();
-                    String expectedSignature = HmacUtil.sign(user.getApiSecret(), dataToSign);
+                    String fullPath = request.getRequestURI() + (request.getQueryString() != null ? "?" + request.getQueryString() : "");
+                    String dataToSign = apiKey + "\n" + request.getMethod() + "\n" + fullPath;
+
 
 
                     System.out.println("---- HMAC DEBUG ----");
                     System.out.println("API KEY: " + apiKey);
-                    System.out.println("TIMESTAMP: " + timestamp);
-                    System.out.println("NONCE: " + nonce);
                     System.out.println("METHOD: " + request.getMethod());
-                    System.out.println("PATH: " + request.getRequestURI());
+                    System.out.println("PATH: " + fullPath);
                     System.out.println("DATA TO SIGN:\n" + dataToSign);
-                    System.out.println("EXPECTED SIGNATURE: " + expectedSignature);
+
                     System.out.println("RECEIVED SIGNATURE: " + signature);
                     System.out.println("--------------------");
                     // Origin check
@@ -91,29 +96,20 @@ public class ApiKeyAuthenticationFilter extends OncePerRequestFilter {
                         return;
                     }
                     // X-signature check
-                    if (signature == null || timestamp == null || nonce == null) {
+                    if (signature == null ) {
                         reject(response,401, "Missing HMAC headers");
                         return;
                     }
-
-                    long ts = Long.parseLong(timestamp);
-                    if (Math.abs(System.currentTimeMillis() - ts) > 2 * 60 * 1000) {
-                        reject(response,401, "Request too old");
+                    try {
+                        if (!verifySignature(dataToSign, signature, user.getPublicKey())) {
+                            reject(response, 401, "Invalid signature");
+                            return;
+                        }
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                        reject(response, 500, "Error verifying signature");
                         return;
                     }
-
-                    if (!NonceUtil.checkNonce(apiKey, nonce)) {
-                        reject(response, 401, "Replay attack detected");
-                        return;
-                    }
-
-
-
-                    if (!expectedSignature.equals(signature)) {
-                        reject(response,401, "Invalid signature");
-                        return;
-                    }
-
 
                 }
             }
@@ -127,6 +123,32 @@ public class ApiKeyAuthenticationFilter extends OncePerRequestFilter {
         response.setContentType("application/json");
         response.getWriter().write("{\"error\":\"" + message + "\"}");
         response.getWriter().flush();
+    }
+
+    private boolean verifySignature(String dataToSign, String base64Signature, String publicKeyPem) throws Exception {
+
+        System.out.println("User_public: " + publicKeyPem);
+        String pem = publicKeyPem
+                .replace("-----BEGIN PUBLIC KEY-----", "")
+                .replace("-----END PUBLIC KEY-----", "")
+                .replaceAll("\\s+", "");
+
+        byte[] decoded = Base64.getDecoder().decode(pem);
+
+        X509EncodedKeySpec spec = new X509EncodedKeySpec(decoded);
+        KeyFactory keyFactory = KeyFactory.getInstance("EC"); // Use "EC" instead of "RSA"
+        PublicKey publicKey = keyFactory.generatePublic(spec);
+
+
+        Signature sig = Signature.getInstance("SHA256withECDSA"); // EC signature algorithm
+        sig.initVerify(publicKey);
+
+
+        sig.update(dataToSign.getBytes(StandardCharsets.UTF_8));
+
+        byte[] signatureBytes = Base64.getDecoder().decode(base64Signature);
+
+        return sig.verify(signatureBytes);
     }
 }
 

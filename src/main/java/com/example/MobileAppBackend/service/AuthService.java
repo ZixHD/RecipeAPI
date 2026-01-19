@@ -66,21 +66,19 @@ public class AuthService {
             throw new RuntimeException("Email already registered");
         }
         String generatedApiKey = apiKeyService.generateApiKey();
-        String generatedApiSecret = apiKeyService.generateApiSecret();
         User developer = new User();
         developer.setEmail(clientRegisterRequestDto.getEmail());
         developer.setUsername(clientRegisterRequestDto.getUsername());
         developer.setPassword(clientRegisterRequestDto.getPassword());
         developer.setUserType(UserType.CLIENT);
         developer.setApiKey(generatedApiKey);
-        developer.setApiSecret(generatedApiSecret);
         developer.setApiKeyActive(true);
-
+        String privateKey = ApiKeyService.generateClientPrivatePublicKey(developer, userRepository);
         User savedDeveloper = userRepository.save(developer);
 
         ClientRegisterResponseDto clientRegisterResponseDto = new ClientRegisterResponseDto(
                 savedDeveloper.getApiKey(),
-                savedDeveloper.getApiSecret(),
+                privateKey,
                 "Client account created successfully. Save your API key and secret - they won't be shown again!"
         );
         return clientRegisterResponseDto;
