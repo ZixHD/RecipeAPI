@@ -3,9 +3,11 @@ package com.example.MobileAppBackend.config;
 import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoClients;
 import io.github.cdimascio.dotenv.Dotenv;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+@Slf4j
 @Configuration
 public class MongoConfig {
 
@@ -17,7 +19,6 @@ public class MongoConfig {
         String host = dotenv.get("MONGO_URI");
         String database = dotenv.get("MONGO_DB");
 
-// Optional: additional URI options
         String options = "retryWrites=true&w=majority&appName=Cluster0";
 
         String uri = String.format(
@@ -29,7 +30,7 @@ public class MongoConfig {
                 options
         );
 
-        System.out.println(uri);
+        log.info("uri: {}", uri);
         return MongoClients.create(uri);
     }
 }

@@ -8,6 +8,7 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -24,6 +25,7 @@ import java.util.Base64;
 import java.util.Collections;
 import java.util.Optional;
 
+@Slf4j
 @Component
 @RequiredArgsConstructor
 public class ApiKeyAuthenticationFilter extends OncePerRequestFilter {
@@ -103,6 +105,9 @@ public class ApiKeyAuthenticationFilter extends OncePerRequestFilter {
                     try {
                         if (!verifySignature(dataToSign, signature, user.getPublicKey())) {
                             reject(response, 401, "Invalid signature");
+                            log.debug("Date {}",dataToSign);
+                            log.debug("Signature {}",signature);
+                            log.debug("Public key {}",user.getPublicKey());
                             return;
                         }
                     } catch (Exception e) {
@@ -136,11 +141,11 @@ public class ApiKeyAuthenticationFilter extends OncePerRequestFilter {
         byte[] decoded = Base64.getDecoder().decode(pem);
 
         X509EncodedKeySpec spec = new X509EncodedKeySpec(decoded);
-        KeyFactory keyFactory = KeyFactory.getInstance("EC"); // Use "EC" instead of "RSA"
+        KeyFactory keyFactory = KeyFactory.getInstance("EC");
         PublicKey publicKey = keyFactory.generatePublic(spec);
 
 
-        Signature sig = Signature.getInstance("SHA256withECDSA"); // EC signature algorithm
+        Signature sig = Signature.getInstance("SHA256withECDSA");
         sig.initVerify(publicKey);
 
 

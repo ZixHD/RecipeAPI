@@ -9,6 +9,7 @@ import com.example.MobileAppBackend.repository.CommentRepository;
 import com.example.MobileAppBackend.repository.PostRecipeRepository;
 import com.example.MobileAppBackend.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
@@ -23,6 +24,7 @@ import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class PostRecipeService {
@@ -34,11 +36,6 @@ public class PostRecipeService {
     private final ModelMapper modelMapper;
     private final MongoTemplate mongoTemplate;
 
-
-    //TODO: Need to add all recipe methods here
-
-    //pristup sa razlicitih adresa, servisa, sa odredjenog domena za api key je bezan domen
-    //generalno koja je logika iza toga, ko se kaci preko kljuca, jer bi inace svako sa kljucem mogao da se nakaci i da svi dele kljuceve
 
     public List<Map<String, Object>> getSpecificRecipesExclude(String exclude) {
         Set<String> excludedFields = exclude != null
@@ -73,12 +70,10 @@ public class PostRecipeService {
                     Map<String, Object> map =
                             mapper.convertValue(recipe, new TypeReference<Map<String, Object>>() {});
 
-                    // If include is empty/null, return full object
                     if (includedFields.isEmpty()) {
                         return map;
                     }
 
-                    // Keep only included fields
                     map.keySet().retainAll(includedFields);
                     return map;
                 })
@@ -105,6 +100,7 @@ public class PostRecipeService {
 
         List<Comment> comments = commentRepository.findCommentsByPostId(id);
         if (comments == null || comments.isEmpty()) {
+            log.warn("No comments found for this post");
             throw new RuntimeException("No comments found for this post.");
         }
         return new PostWithRecipe(post, comments);
@@ -158,17 +154,6 @@ public class PostRecipeService {
             query.addCriteria(new Criteria().andOperator(criteriaList.toArray(new Criteria[0])));
         }
 
-        // Sorting
-//        if(filterRequest.isSortByNewest()){
-//            query.with(Sort.by(Sort.Direction.DESC, "created_at"));
-//        }else if(filterRequest.isSortByOldest()){
-//            query.with(Sort.by(Sort.Direction.ASC, "created_at"));
-//        }else if(filterRequest.isSortByPopularity()){
-//            query.with(Sort.by(Sort.Direction.ASC, "views"));
-//        }else if(filterRequest.isSortByPrepTime()){
-//            query.with(Sort.by(Sort.Direction.ASC, "prep_time"));
-//        }
-
         return mongoTemplate.find(query, PostRecipe.class);
 
     }
@@ -182,9 +167,15 @@ public class PostRecipeService {
 
     public void toggleFavorite(String id){
         User user  = userRepository.findById(getCurrentUserId())
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() ->{
+                    log.warn("User not found");
+                    return new RuntimeException("User not found");
+                });
         postRecipeRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Post not found"));
+                .orElseThrow(() -> {
+                    log.warn("Post not found");
+                    return new RuntimeException("Post not found");
+                });
 
         if (user.getFavorites().contains(id)) {
             user.getFavorites().remove(id);
@@ -206,6 +197,8 @@ public class PostRecipeService {
                 .map(ratingDto -> modelMapper.map(ratingDto, Rating.class))
                 .collect(Collectors.toList());
         post.setRatings(ratings);
+        log.debug("Created post body {}", post);
+        log.info("Post created successfully");
         return this.postRecipeRepository.save(post);
     }
 
@@ -213,6 +206,7 @@ public class PostRecipeService {
         PostRecipe existingPost = this.postRecipeRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Post not found"));
         if(!existingPost.getAuthorId().equals(getCurrentUserId())) {
+            log.warn("You are not allowed to edit this post");
             throw new RuntimeException("You are not allowed to edit this post");
         }
 
@@ -232,7 +226,8 @@ public class PostRecipeService {
         Optional.ofNullable(createPostRequest.getText()).ifPresent(existingPost::setText);
         Optional.ofNullable(createPostRequest.getViews()).ifPresent(existingPost::setViews);
         Optional.ofNullable(createPostRequest.getCreated_at()).ifPresent(existingPost::setCreated_at);
-
+        log.debug("Post body {}", existingPost);
+        log.info("Post updated successfully");
         return postRecipeRepository.save(existingPost);
     }
 
@@ -243,6 +238,7 @@ public class PostRecipeService {
             throw new RuntimeException("You are not allowed to remove this post");
         }
         optionalPost.ifPresent(postRecipeRepository::delete);
+        log.info("Post deleted successfully");
     }
 
     private String getCurrentUserId() {

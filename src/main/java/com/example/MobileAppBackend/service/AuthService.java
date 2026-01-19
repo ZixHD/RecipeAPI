@@ -10,11 +10,12 @@ import com.example.MobileAppBackend.model.User;
 import com.example.MobileAppBackend.model.UserType;
 import com.example.MobileAppBackend.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.bcrypt.BCrypt;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class AuthService {
@@ -31,6 +32,7 @@ public class AuthService {
 
     public void register(RegisterRequest registerRequest) throws IllegalArgumentException{
         if (userRepository.findByEmail(registerRequest.getEmail()).isPresent()) {
+            log.warn("Email already exists");
             throw new RuntimeException("Email already in use");
         }
 
@@ -45,6 +47,8 @@ public class AuthService {
         user.setUserType(UserType.USER);
 
         userRepository.save(user);
+        log.debug("Created user {}", user);
+        log.info("User registered successfully");
     }
 
     public String login(LoginRequest loginRequest) throws IllegalArgumentException {
@@ -55,14 +59,17 @@ public class AuthService {
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("User not found"));
         if(user != null && verifyPassword(password, user.getPassword())) {
+            log.info("User logged in successfully");
             return jwtService.generateToken(user.getId(), user.getUsername());
         }
+        log.warn("Invalid credentials");
         throw new IllegalArgumentException("Invalid email or password");
 
     }
 
     public ClientRegisterResponseDto clientRegister(ClientRegisterRequestDto clientRegisterRequestDto) {
         if(userRepository.existsUserByEmail(clientRegisterRequestDto.getEmail())) {
+            log.warn("Email already exists");
             throw new RuntimeException("Email already registered");
         }
         String generatedApiKey = apiKeyService.generateApiKey();
@@ -81,6 +88,7 @@ public class AuthService {
                 privateKey,
                 "Client account created successfully. Save your API key and secret - they won't be shown again!"
         );
+        log.debug("New user registered: {}", developer);
         return clientRegisterResponseDto;
     }
 

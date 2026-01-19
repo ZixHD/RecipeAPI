@@ -6,6 +6,7 @@ import com.example.MobileAppBackend.model.Comment;
 import com.example.MobileAppBackend.model.User;
 import com.example.MobileAppBackend.repository.CommentRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -14,6 +15,7 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.Optional;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class CommentService {
@@ -23,7 +25,8 @@ public class CommentService {
 
     public Comment createComment(CreateCommentRequest createCommentRequest) {
         Comment comment = modelMapper.map(createCommentRequest, Comment.class);
-        System.out.println("comment: " + comment);
+        log.debug("New comment created: {}", comment);
+        log.info("New comment created");
         return commentRepository.save(comment);
     }
 
@@ -44,6 +47,7 @@ public class CommentService {
                 .orElseThrow(() -> new RuntimeException("Comment not found"));
 
         if(!existingComment.getAuthorId().equals(getCurrentUserId())) {
+            log.error("You are not allowed to edit this comment");
             throw new RuntimeException("You are not allowed to edit this comment");
         }
         Comment comment =  modelMapper.map(createCommentRequest, Comment.class);
@@ -52,7 +56,8 @@ public class CommentService {
         Optional.ofNullable(comment.getPostId()).ifPresent(existingComment::setPostId);
         Optional.ofNullable(comment.getText()).ifPresent(existingComment::setText);
         Optional.ofNullable(comment.getCreated_at()).ifPresent(existingComment::setCreated_at);
-
+        log.debug("Edited comment created: {}", comment);
+        log.info("Comment updated successfully");
         return commentRepository.save(existingComment);
 
     }
@@ -63,6 +68,7 @@ public class CommentService {
             throw new RuntimeException("You are not allowed to remove this comment");
         }
         optionalComment.ifPresent(commentRepository::delete);
+        log.info("Comment deleted successfully");
     }
 
     private String getCurrentUserId() {
