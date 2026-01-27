@@ -10,6 +10,6 @@ import lombok.RequiredArgsConstructor;
 public class ClientRegisterResponseDto {
 
     private String apiKey;
-    private String apiSecret;
+    private String privateKey;
     private String message;
 }

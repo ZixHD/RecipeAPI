@@ -25,7 +25,7 @@ public class AuthService {
     private final ApiKeyService apiKeyService;
     private final PasswordEncoder passwordEncoder;
 
-    private boolean verifyPassword(String rawPassword, String hashedPassword) {
+    protected boolean verifyPassword(String rawPassword, String hashedPassword) {
         if (rawPassword == null || hashedPassword == null) return false;
         return BCrypt.checkpw(rawPassword, hashedPassword);
     }
