@@ -19,6 +19,7 @@ public class Recipe {
 
 
     private String title;
+    //this will be deleted soon
     private String author_id;
     private String description;
     private List<Ingredient> ingredients;

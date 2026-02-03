@@ -55,7 +55,6 @@ public class AuthService {
         String email = loginRequest.getEmail();
         String password = loginRequest.getPassword();
 
-
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("User not found"));
         if(user != null && verifyPassword(password, user.getPassword())) {

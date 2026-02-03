@@ -29,18 +29,18 @@ public class CommentController {
     }
 
     @PostMapping("/create")
-    public ResponseEntity<Comment> createUser(@Valid @RequestBody CreateCommentRequest createCommentRequest) {
+    public ResponseEntity<Comment> createComment(@Valid @RequestBody CreateCommentRequest createCommentRequest) {
         return ResponseEntity.ok(commentService.createComment(createCommentRequest));
 
     }
 
     @PutMapping("/edit/{id}")
-    public ResponseEntity<Comment> editUser(@PathVariable String id,  @Valid @RequestBody CreateCommentRequest createCommentRequest) {
+    public ResponseEntity<Comment> editComment(@PathVariable String id,  @Valid @RequestBody CreateCommentRequest createCommentRequest) {
         return ResponseEntity.ok(commentService.editComment(id, createCommentRequest));
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Comment> deleteUser(@PathVariable String id) {
+    public ResponseEntity<Comment> deleteComment(@PathVariable String id) {
         this.commentService.deleteComment(id);
         return ResponseEntity.ok().build();
     }

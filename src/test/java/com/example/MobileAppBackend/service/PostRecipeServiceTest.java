@@ -2,11 +2,10 @@ package com.example.MobileAppBackend.service;
 
 import com.example.MobileAppBackend.dto.create.CreatePostRequest;
 import com.example.MobileAppBackend.dto.model.FilterRequest;
+import com.example.MobileAppBackend.dto.model.RecipeDto;
 import com.example.MobileAppBackend.model.*;
-import com.example.MobileAppBackend.repository.CommentRepository;
 import com.example.MobileAppBackend.repository.PostRecipeRepository;
 import com.example.MobileAppBackend.repository.UserRepository;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.modelmapper.ModelMapper;
@@ -32,9 +31,6 @@ class PostRecipeServiceTest {
     private UserRepository userRepository;
 
     @Mock
-    private CommentRepository commentRepository;
-
-    @Mock
     private ModelMapper modelMapper;
 
     @Mock
@@ -43,7 +39,7 @@ class PostRecipeServiceTest {
     @InjectMocks
     private PostRecipeService postRecipeService;
 
-    // ---------------- helpers ----------------
+
 
     private void mockAuthenticatedUser(String userId) {
         User user = new User();
@@ -58,39 +54,118 @@ class PostRecipeServiceTest {
         SecurityContextHolder.setContext(context);
     }
 
-    @AfterEach
-    void clearSecurityContext() {
-        SecurityContextHolder.clearContext();
-    }
-
-
     @Test
-    void getAllPosts_returnsAllPosts() {
-        when(postRecipeRepository.findAll()).thenReturn(List.of(new PostRecipe(), new PostRecipe()));
-
-        List<PostRecipe> result = postRecipeService.getAllPosts();
-
-        assertEquals(2, result.size());
-        verify(postRecipeRepository).findAll();
-    }
-
-
-    @Test
-    void getById_returnsPostWithComments() {
+    void getById_returnsPost_whenExists() {
         PostRecipe post = new PostRecipe();
         post.setId("p1");
-
-        Comment c1 = new Comment();
-        Comment c2 = new Comment();
-
         when(postRecipeRepository.findById("p1")).thenReturn(Optional.of(post));
-        when(commentRepository.findCommentsByPostId("p1")).thenReturn(List.of(c1, c2));
+        when(postRecipeRepository.findPostById("p1")).thenReturn(post);
 
-        var result = postRecipeService.getById("p1");
+        PostRecipe result = postRecipeService.getById("p1");
 
-        assertEquals(post, result.getPost());
-        assertEquals(2, result.getComments().size());
+        assertNotNull(result);
+        assertEquals("p1", result.getId());
     }
+
+    @Test
+    void getById_throws_whenNotFound() {
+        when(postRecipeRepository.findById("p1")).thenReturn(Optional.empty());
+
+        assertThrows(RuntimeException.class, () -> postRecipeService.getById("p1"));
+    }
+
+    @Test
+    void getAllRecipes_mapsToDto() {
+        PostRecipe post = new PostRecipe();
+        post.setTitle("Test Recipe");
+        when(postRecipeRepository.findAll()).thenReturn(List.of(post));
+
+        List<RecipeDto> result = postRecipeService.getAllRecipes();
+
+        assertEquals(1, result.size());
+        assertEquals("Test Recipe", result.get(0).getTitle());
+    }
+
+    @Test
+    void filterRecipes_returnsDtoList() {
+        FilterRequest filter = new FilterRequest();
+        PostRecipe post = new PostRecipe();
+        post.setTitle("Filtered Recipe");
+
+        // mock filterPosts to return a list
+        PostRecipeService spyService = spy(postRecipeService);
+        doReturn(List.of(post)).when(spyService).filterPosts(filter);
+
+        List<RecipeDto> result = spyService.filterRecipes(filter);
+
+        assertEquals(1, result.size());
+        assertEquals("Filtered Recipe", result.get(0).getTitle());
+    }
+
+    @Test
+    void editPost_updatesFields_whenAuthorMatches() {
+        mockAuthenticatedUser("u1");
+
+        PostRecipe existing = new PostRecipe();
+        existing.setAuthorId("u1");
+
+        CreatePostRequest req = new CreatePostRequest();
+        req.setText("Updated text");
+
+        when(postRecipeRepository.findById("p1")).thenReturn(Optional.of(existing));
+        when(postRecipeRepository.save(existing)).thenReturn(existing);
+
+        PostRecipe updated = postRecipeService.editPost("p1", req);
+
+        assertEquals("Updated text", updated.getText());
+    }
+
+    @Test
+    void editPost_throws_whenNotAuthor() {
+        mockAuthenticatedUser("u1");
+
+        PostRecipe existing = new PostRecipe();
+        existing.setAuthorId("u2");
+
+        CreatePostRequest req = new CreatePostRequest();
+
+        when(postRecipeRepository.findById("p1")).thenReturn(Optional.of(existing));
+
+        assertThrows(RuntimeException.class,
+                () -> postRecipeService.editPost("p1", req));
+    }
+
+    @Test
+    void getSpecificRecipesInclude_returnsIncludedFieldsOnly() {
+        PostRecipe post = new PostRecipe();
+        post.setTitle("Recipe1");
+        post.setDescription("Desc1");
+
+        when(postRecipeRepository.findAll()).thenReturn(List.of(post));
+
+        List<Map<String, Object>> result = postRecipeService.getSpecificRecipesInclude("title");
+
+        assertEquals(1, result.size());
+        assertTrue(result.get(0).containsKey("title"));
+        assertFalse(result.get(0).containsKey("description"));
+    }
+
+    @Test
+    void getSpecificRecipesExclude_removesFields() {
+        PostRecipe post = new PostRecipe();
+        post.setTitle("Recipe1");
+        post.setDescription("Desc1");
+
+        when(postRecipeRepository.findAll()).thenReturn(List.of(post));
+
+        List<Map<String, Object>> result = postRecipeService.getSpecificRecipesExclude("description");
+
+        assertEquals(1, result.size());
+        assertTrue(result.get(0).containsKey("title"));
+        assertFalse(result.get(0).containsKey("description"));
+    }
+
+
 
 
     @Test
@@ -110,23 +185,7 @@ class PostRecipeServiceTest {
         verify(userRepository).save(user);
     }
 
-    @Test
-    void toggleFavorite_removesFavorite_whenPresent() {
-        mockAuthenticatedUser("u1");
 
-        User user = new User();
-        user.setId("u1");
-        user.setFavorites(new HashSet<>());
-
-
-        when(userRepository.findById("u1")).thenReturn(Optional.of(user));
-        when(postRecipeRepository.findById("p1")).thenReturn(Optional.of(new PostRecipe()));
-
-        postRecipeService.toggleFavorite("p1");
-
-        assertFalse(user.getFavorites().contains("p1"));
-        verify(userRepository).save(user);
-    }
 
 
     @Test

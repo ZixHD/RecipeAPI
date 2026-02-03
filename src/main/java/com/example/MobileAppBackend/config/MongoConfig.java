@@ -7,6 +7,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
+
 @Slf4j
 @Configuration
 public class MongoConfig {
@@ -17,20 +20,18 @@ public class MongoConfig {
         String username = dotenv.get("MONGO_USERNAME");
         String password = dotenv.get("MONGO_PASSWORD");
         String host = dotenv.get("MONGO_URI");
-        String database = dotenv.get("MONGO_DB");
 
-        String options = "retryWrites=true&w=majority&appName=Cluster0";
+        String encodedPassword = URLEncoder.encode(password, StandardCharsets.UTF_8);
 
         String uri = String.format(
-                "mongodb+srv://%s:%s@%s/%s?%s",
+                "mongodb+srv://%s:%s@%s/?retryWrites=true&w=majority&appName=Cluster0",
                 username,
-                password,
-                host,
-                database,
-                options
+                encodedPassword,
+                host
         );
+        System.out.println("uri: " + uri);
+        log.info("Connecting to MongoDB Atlas...");
 
-        log.info("uri: {}", uri);
         return MongoClients.create(uri);
     }
 }

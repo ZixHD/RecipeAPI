@@ -27,7 +27,6 @@ public class PostRecipe {
 
     // Recipe part
     private String title;
-    private String author_id;
     private String description;
     private List<Ingredient> ingredients;
     private List<Step> steps;

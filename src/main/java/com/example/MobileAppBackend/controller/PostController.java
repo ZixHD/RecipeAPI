@@ -29,12 +29,12 @@ public class PostController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<PostWithRecipe> getPostById(@PathVariable String id){
-        PostWithRecipe post = postRecipeService.getById(id);
+    public ResponseEntity<PostRecipe> getPostById(@PathVariable String id){
+        PostRecipe post = postRecipeService.getById(id);
         return ResponseEntity.ok(post);
     }
 
-    @GetMapping("/filter")
+    @PostMapping("/filter")
     public ResponseEntity<List<PostRecipe>> filterPosts(@RequestBody FilterRequest filterRequest){
         return ResponseEntity.ok(postRecipeService.filterPosts(filterRequest));
     }

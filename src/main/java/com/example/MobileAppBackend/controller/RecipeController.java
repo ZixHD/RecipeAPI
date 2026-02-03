@@ -37,7 +37,7 @@ public class RecipeController {
 
 
     //API
-    @GetMapping("/filter")
+    @PostMapping("/filter")
     public ResponseEntity<List<RecipeDto>> filterRecipes(@RequestBody FilterRequest filterRequest){
         return ResponseEntity.ok(postRecipeService.filterRecipes(filterRequest));
     }

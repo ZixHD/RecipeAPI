@@ -93,17 +93,17 @@ public class PostRecipeService {
         return this.postRecipeRepository.findAll();
     }
 
-    public PostWithRecipe getById(String id){
+    public PostRecipe getById(String id){
         PostRecipe post = postRecipeRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Post not found"));
 
 
-        List<Comment> comments = commentRepository.findCommentsByPostId(id);
-        if (comments == null || comments.isEmpty()) {
+        PostRecipe postRecipe = postRecipeRepository.findPostById(id);
+        if (postRecipe == null) {
             log.warn("No comments found for this post");
-            throw new RuntimeException("No comments found for this post.");
+            throw new RuntimeException("No post found for this post.");
         }
-        return new PostWithRecipe(post, comments);
+        return postRecipe;
 
     }
 
@@ -187,7 +187,7 @@ public class PostRecipeService {
     }
 
     public PostRecipe createPost(CreatePostRequest createPostRequest){
-
+        System.out.println("Hit");
         createPostRequest.setCreated_at(LocalDateTime.now());
         PostRecipe post = modelMapper.map(createPostRequest, PostRecipe.class);
 

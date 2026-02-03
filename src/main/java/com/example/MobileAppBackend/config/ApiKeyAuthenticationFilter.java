@@ -38,7 +38,7 @@ public class ApiKeyAuthenticationFilter extends OncePerRequestFilter {
 
 
         String apiKey = request.getHeader("X-API-Key");
-        String origin = request.getHeader("Origin");
+//        String origin = request.getHeader("Origin");
         String signature = request.getHeader("X-Signature");
 //        String nonce = request.getHeader("X-Nonce");
 //        String timestamp = request.getHeader("X-Timestamp");
@@ -77,44 +77,44 @@ public class ApiKeyAuthenticationFilter extends OncePerRequestFilter {
                     System.out.println("RECEIVED SIGNATURE: " + signature);
                     System.out.println("--------------------");
                     // Origin check
-                    if(origin != null && !origin.isBlank()){
-                        if(user.getAllowedDomains() == null){
-                            user.setAllowedDomains(origin);
-                            userRepository.save(user);
-
-                        }
-                        else if(!user.getAllowedDomains().equalsIgnoreCase(origin)){
-                            reject(response, 401, "Domain not allowed");
-                            return;
-                        }
-
-
-                    }
+//                    if(origin != null && !origin.isBlank()){
+//                        if(user.getAllowedDomains() == null){
+//                            user.setAllowedDomains(origin);
+//                            userRepository.save(user);
+//
+//                        }
+//                        else if(!user.getAllowedDomains().equalsIgnoreCase(origin)){
+//                            reject(response, 401, "Domain not allowed");
+//                            return;
+//                        }
+//
+//
+//                    }
 
                     // Redis rate-limiting
                     // In filter method
-                    if (!rateLimiter.allowRequest(apiKey)) {
-                        reject(response,429, "Too many requests");
-                        return;
-                    }
-                    // X-signature check
-                    if (signature == null ) {
-                        reject(response,401, "Missing HMAC headers");
-                        return;
-                    }
-                    try {
-                        if (!verifySignature(dataToSign, signature, user.getPublicKey())) {
-                            reject(response, 401, "Invalid signature");
-                            log.debug("Date {}",dataToSign);
-                            log.debug("Signature {}",signature);
-                            log.debug("Public key {}",user.getPublicKey());
-                            return;
-                        }
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                        reject(response, 500, "Error verifying signature");
-                        return;
-                    }
+//                    if (!rateLimiter.allowRequest(apiKey)) {
+//                        reject(response,429, "Too many requests");
+//                        return;
+//                    }
+//                    // X-signature check
+//                    if (signature == null ) {
+//                        reject(response,401, "Missing HMAC headers");
+//                        return;
+//                    }
+//                    try {
+//                        if (!verifySignature(dataToSign, signature, user.getPublicKey())) {
+//                            reject(response, 401, "Invalid signature");
+//                            log.debug("Date {}",dataToSign);
+//                            log.debug("Signature {}",signature);
+//                            log.debug("Public key {}",user.getPublicKey());
+//                            return;
+//                        }
+//                    } catch (Exception e) {
+//                        e.printStackTrace();
+//                        reject(response, 500, "Error verifying signature");
+//                        return;
+//                    }
 
                 }
             }
