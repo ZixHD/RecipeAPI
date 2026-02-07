@@ -202,34 +202,74 @@ public class PostRecipeService {
         return this.postRecipeRepository.save(post);
     }
 
-    public PostRecipe editPost(String id, CreatePostRequest createPostRequest) {
-        PostRecipe existingPost = this.postRecipeRepository.findById(id)
+    public PostRecipe editPost(String id, CreatePostRequest req) {
+
+        PostRecipe existingPost = postRecipeRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Post not found"));
-        if(!existingPost.getAuthorId().equals(getCurrentUserId())) {
+
+        if (!existingPost.getAuthorId().equals(getCurrentUserId())) {
             log.warn("You are not allowed to edit this post");
             throw new RuntimeException("You are not allowed to edit this post");
         }
 
-        Optional.ofNullable(createPostRequest.getAuthorId()).ifPresent(existingPost::setAuthorId);
+        Optional.ofNullable(req.getAuthorId()).ifPresent(existingPost::setAuthorId);
+        Optional.ofNullable(req.getText()).ifPresent(existingPost::setText);
+        Optional.ofNullable(req.getTitle()).ifPresent(existingPost::setTitle);
+        Optional.ofNullable(req.getDescription()).ifPresent(existingPost::setDescription);
+        Optional.ofNullable(req.getCuisine()).ifPresent(existingPost::setCuisine);
+        Optional.ofNullable(req.getDifficulty()).ifPresent(existingPost::setDifficulty);
 
-        if (createPostRequest.getRatings() != null) {
-            List<Rating> mappedRatings = createPostRequest.getRatings().stream()
-                    .map(dto -> {
-                        Rating rating = new Rating();
-                        rating.setUserId(dto.getUserId());
-                        rating.setScore(dto.getScore());
-                        return rating;
-                    })
-                    .collect(Collectors.toList());
-            existingPost.setRatings(mappedRatings);
+        Optional.ofNullable(req.getTags()).ifPresent(existingPost::setTags);
+        Optional.ofNullable(req.getAllergies()).ifPresent(existingPost::setAllergies);
+
+        if (req.getIngredients() != null) {
+            List<Ingredient> ingredients = req.getIngredients().stream()
+                    .map(dto -> new Ingredient(dto.getName(), dto.getQuantity()))
+                    .toList();
+            existingPost.setIngredients(ingredients);
         }
-        Optional.ofNullable(createPostRequest.getText()).ifPresent(existingPost::setText);
-        Optional.ofNullable(createPostRequest.getViews()).ifPresent(existingPost::setViews);
-        Optional.ofNullable(createPostRequest.getCreated_at()).ifPresent(existingPost::setCreated_at);
+
+        if (req.getSteps() != null) {
+            List<Step> steps = req.getSteps().stream()
+                    .map(dto -> new Step(
+                            dto.getStepNumber(),
+                            dto.getInstruction(),
+                            dto.getMedia()))
+                    .toList();
+            existingPost.setSteps(steps);
+        }
+
+        if (req.getRatings() != null) {
+            List<Rating> ratings = req.getRatings().stream()
+                    .map(dto -> {
+                        Rating r = new Rating();
+                        r.setUserId(dto.getUserId());
+                        r.setScore(dto.getScore());
+                        return r;
+                    })
+                    .toList();
+            existingPost.setRatings(ratings);
+        }
+
+        // Numbers (primitive handling)
+        if (req.getPrep_time() != 0)
+            existingPost.setPrep_time(req.getPrep_time());
+
+        if (req.getCalories() != 0)
+            existingPost.setCalories(req.getCalories());
+
+        if (req.getViews() != 0)
+            existingPost.setViews(req.getViews());
+
+        Optional.ofNullable(req.getCreated_at())
+                .ifPresent(existingPost::setCreated_at);
+
         log.debug("Post body {}", existingPost);
         log.info("Post updated successfully");
+
         return postRecipeRepository.save(existingPost);
     }
+
 
     public void deletePost(String id){
         Optional<PostRecipe> optionalPost = this.postRecipeRepository.findById(id);
