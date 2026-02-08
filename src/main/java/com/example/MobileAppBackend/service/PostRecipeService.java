@@ -188,15 +188,10 @@ public class PostRecipeService {
 
     public PostRecipe createPost(CreatePostRequest createPostRequest){
         System.out.println("Hit");
+        createPostRequest.setViews(0);
         createPostRequest.setCreated_at(LocalDateTime.now());
         PostRecipe post = modelMapper.map(createPostRequest, PostRecipe.class);
 
-
-
-        List<Rating> ratings = createPostRequest.getRatings().stream()
-                .map(ratingDto -> modelMapper.map(ratingDto, Rating.class))
-                .collect(Collectors.toList());
-        post.setRatings(ratings);
         log.debug("Created post body {}", post);
         log.info("Post created successfully");
         return this.postRecipeRepository.save(post);
@@ -239,17 +234,7 @@ public class PostRecipeService {
             existingPost.setSteps(steps);
         }
 
-        if (req.getRatings() != null) {
-            List<Rating> ratings = req.getRatings().stream()
-                    .map(dto -> {
-                        Rating r = new Rating();
-                        r.setUserId(dto.getUserId());
-                        r.setScore(dto.getScore());
-                        return r;
-                    })
-                    .toList();
-            existingPost.setRatings(ratings);
-        }
+       
 
         // Numbers (primitive handling)
         if (req.getPrep_time() != 0)

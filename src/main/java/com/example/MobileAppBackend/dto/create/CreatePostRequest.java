@@ -25,9 +25,6 @@ public class CreatePostRequest {
     @NotBlank(message = "Post must have an author id.")
     private String authorId;
 
-    @NotBlank(message = "Post must have a recipe id.")
-    private String recipeId;
-
     @NotBlank(message="Text cannot be empty.")
     @Size(min = 5, max = 100, message = "Post text must be between 5 and 50 characters long.")
     private String text;
@@ -35,9 +32,6 @@ public class CreatePostRequest {
     @NotBlank(message = "Recipe must have a title.")
     @Size(min = 5, max = 100, message = "Recipe title must be between 5 and 100 characters long.")
     private String title;
-
-    @NotBlank(message = "Recipe must have an author id.")
-    private String author_id;
 
     @NotNull(message = "Recipe must have a list of ingredients.")
     private List<IngredientDto> ingredients;
@@ -66,7 +60,6 @@ public class CreatePostRequest {
     @NotNull(message = "Recipe must have defined calories.")
     private int calories;
 
-    private List<RatingDto> ratings;
     private int views;
     private LocalDateTime created_at;
 
