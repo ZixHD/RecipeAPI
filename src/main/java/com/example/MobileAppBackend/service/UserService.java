@@ -49,7 +49,7 @@ public class UserService {
             log.warn("You are not allowed to edit this user");
             throw new RuntimeException("You are not allowed to edit this user ");
         }
-
+        System.out.println(userDto.toString());
         Optional.ofNullable(user.getUsername()).ifPresent(existingUser::setUsername);
         Optional.ofNullable(user.getEmail()).ifPresent(existingUser::setEmail);
         Optional.ofNullable(user.getPassword()).ifPresent(existingUser::setPassword);

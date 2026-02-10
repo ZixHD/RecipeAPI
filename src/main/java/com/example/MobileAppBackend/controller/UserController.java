@@ -41,10 +41,10 @@ public class UserController {
         return ResponseEntity.ok(userService.createUser(userDto));
     }
 
-    @PutMapping("/edit/{name}")
-    public ResponseEntity<User> editUser(@PathVariable String name, @RequestBody CreateUserRequest userDto){
+    @PutMapping("/edit/{id}")
+    public ResponseEntity<User> editUser(@PathVariable String id, @RequestBody CreateUserRequest userDto){
         System.out.println("Edit: " + userDto.toString());
-        return ResponseEntity.ok(userService.editUser(name, userDto));
+        return ResponseEntity.ok(userService.editUser(id, userDto));
     }
 
     @DeleteMapping("/{name}")
