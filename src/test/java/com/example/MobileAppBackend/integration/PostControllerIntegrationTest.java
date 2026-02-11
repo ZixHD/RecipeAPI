@@ -66,7 +66,6 @@ public class PostControllerIntegrationTest {
 
         CreatePostRequest request = new CreatePostRequest();
         request.setTitle("Delicious Cake");
-        request.setAuthor_id(author.getId());
         request.setAuthorId(author.getId());
         request.setDescription("This is a simple cake recipe.");
         request.setDifficulty("Easy");
@@ -74,10 +73,6 @@ public class PostControllerIntegrationTest {
         request.setTags(Arrays.asList("sweet", "cake"));
         request.setAllergies(Arrays.asList("nuts"));
         request.setText("123123123");
-        request.setRatings(Arrays.asList(
-                new RatingDto(author.getId(), 5),
-                new RatingDto("anotherUserId", 4)
-        ));
 
         request.setIngredients(Arrays.asList(
                 new IngredientDto("Flour", "200g"),
@@ -89,7 +84,7 @@ public class PostControllerIntegrationTest {
                 new StepDto(1, "Mix all ingredients", null),
                 new StepDto(2, "Bake at 180°C for 30 minutes", null)
         ));
-        request.setRecipeId("recipe123");
+
 
         mockMvc.perform(post("/api/posts/create")
                         .header("Authorization", authHeader(author))
@@ -168,17 +163,14 @@ public class PostControllerIntegrationTest {
         CreatePostRequest request = new CreatePostRequest();
         request.setTitle("New Title");
         request.setText("New content");
-        request.setAuthor_id(author.getId());
+
         request.setAuthorId(author.getId());
         request.setDescription("This is a simple cake recipe.");
         request.setDifficulty("Easy");
         request.setCuisine("Dessert");
         request.setTags(Arrays.asList("sweet", "cake"));
         request.setAllergies(Arrays.asList("nuts"));
-        request.setRatings(Arrays.asList(
-                new RatingDto(author.getId(), 5),
-                new RatingDto("anotherUserId", 4)
-        ));
+
 
         request.setIngredients(Arrays.asList(
                 new IngredientDto("Flour", "200g"),
@@ -190,7 +182,7 @@ public class PostControllerIntegrationTest {
                 new StepDto(1, "Mix all ingredients", null),
                 new StepDto(2, "Bake at 180°C for 30 minutes", null)
         ));
-        request.setRecipeId("recipe123");
+
 
         mockMvc.perform(put("/api/posts/edit/" + post.getId())
                         .header("Authorization", authHeader(author))

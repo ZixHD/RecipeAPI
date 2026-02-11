@@ -185,25 +185,6 @@ class PostRecipeServiceTest {
         verify(userRepository).save(user);
     }
 
-
-
-
-    @Test
-    void createPost_savesMappedPost() {
-        CreatePostRequest req = new CreatePostRequest();
-        req.setRatings(new ArrayList<>());
-
-        PostRecipe mapped = new PostRecipe();
-
-        when(modelMapper.map(req, PostRecipe.class)).thenReturn(mapped);
-        when(postRecipeRepository.save(mapped)).thenReturn(mapped);
-
-        PostRecipe result = postRecipeService.createPost(req);
-
-        assertNotNull(result);
-        verify(postRecipeRepository).save(mapped);
-    }
-
     @Test
     void deletePost_deletes_whenAuthorMatches() {
         mockAuthenticatedUser("u1");

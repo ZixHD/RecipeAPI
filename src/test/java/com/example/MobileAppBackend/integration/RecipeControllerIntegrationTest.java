@@ -148,6 +148,7 @@ public class RecipeControllerIntegrationTest {
                 .andExpect(status().isBadRequest());
     }
 
+    // izmisljam malo testove, sa edgecasevima sta vraca
     @Test
     void testFilterRecipes_success() throws Exception {
 
