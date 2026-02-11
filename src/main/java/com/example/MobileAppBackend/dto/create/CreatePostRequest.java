@@ -20,8 +20,6 @@ import java.util.List;
 public class CreatePostRequest {
 
 
-    private String id;
-
     @NotBlank(message = "Post must have an author id.")
     private String authorId;
 
@@ -60,7 +58,10 @@ public class CreatePostRequest {
     @NotNull(message = "Recipe must have defined calories.")
     private int calories;
 
+<<<<<<< HEAD
     private int views;
     private LocalDateTime created_at;
+=======
+>>>>>>> 9cf1eb9 (favorite post logic and CreatePostRequest dto fixed)
 
 }

@@ -186,10 +186,20 @@ public class PostRecipeService {
         userRepository.save(user);
     }
 
+    public boolean isFavorited(String postId) {
+        return userRepository.findById(getCurrentUserId())
+                .map(user -> user.getFavorites()   // assuming favorites is a List<String> or Set<String>
+                        .contains(postId))
+                .orElse(false);
+    }
+
     public PostRecipe createPost(CreatePostRequest createPostRequest){
         System.out.println("Hit");
+<<<<<<< HEAD
         createPostRequest.setViews(0);
         createPostRequest.setCreated_at(LocalDateTime.now());
+=======
+>>>>>>> 9cf1eb9 (favorite post logic and CreatePostRequest dto fixed)
         PostRecipe post = modelMapper.map(createPostRequest, PostRecipe.class);
 
         log.debug("Created post body {}", post);
@@ -214,6 +224,7 @@ public class PostRecipeService {
         Optional.ofNullable(req.getCuisine()).ifPresent(existingPost::setCuisine);
         Optional.ofNullable(req.getDifficulty()).ifPresent(existingPost::setDifficulty);
 
+<<<<<<< HEAD
         Optional.ofNullable(req.getTags()).ifPresent(existingPost::setTags);
         Optional.ofNullable(req.getAllergies()).ifPresent(existingPost::setAllergies);
 
@@ -248,6 +259,10 @@ public class PostRecipeService {
 
         Optional.ofNullable(req.getCreated_at())
                 .ifPresent(existingPost::setCreated_at);
+=======
+
+        Optional.ofNullable(createPostRequest.getText()).ifPresent(existingPost::setText);
+>>>>>>> 9cf1eb9 (favorite post logic and CreatePostRequest dto fixed)
 
         log.debug("Post body {}", existingPost);
         log.info("Post updated successfully");

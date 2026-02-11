@@ -45,6 +45,11 @@ public class PostController {
         return ResponseEntity.ok().build();
     }
 
+    @GetMapping("/checkFavorite/{postId}")
+    public ResponseEntity<Boolean> checkFavorite(@PathVariable String postId) {
+        boolean favorited = postRecipeService.isFavorited(postId);
+        return ResponseEntity.ok(favorited);
+    }
     @PostMapping("/create")
     public ResponseEntity<PostRecipe> createPost(@Valid @RequestBody CreatePostRequest createPostRequest){
         System.out.println("Create Post: " + createPostRequest);
