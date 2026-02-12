@@ -60,12 +60,9 @@ public class PostControllerTest {
     @Test
     void testCreatePost() throws Exception {
         CreatePostRequest request = new CreatePostRequest();
-        request.setId("post1");
         request.setAuthorId("user1");
-        request.setRecipeId("recipe1");
         request.setText("This is a sample post text");
         request.setTitle("Delicious Pancakes");
-        request.setAuthor_id("user1");
         request.setDescription("A simple pancake recipe for breakfast");
         request.setIngredients(List.of(new IngredientDto("Flour", "100g"), new IngredientDto("Milk", "200ml")));
         request.setSteps(List.of(new StepDto(1, "Mix ingredients", ""), new StepDto(2, "Cook on pan", "")));
@@ -75,9 +72,6 @@ public class PostControllerTest {
         request.setDifficulty("Easy");
         request.setPrep_time(15);
         request.setCalories(250);
-        request.setRatings(List.of(new RatingDto("user2", 5)));
-        request.setViews(0);
-        request.setCreated_at(LocalDateTime.now());
         PostRecipe post = new PostRecipe();
         post.setId("post1");
         post.setTitle("Test Post");
@@ -97,12 +91,9 @@ public class PostControllerTest {
     @Test
     void testEditPost() throws Exception {
         CreatePostRequest request = new CreatePostRequest();
-        request.setId("post1");
-        request.setAuthorId("user1");
-        request.setRecipeId("recipe1");
+        request.setAuthorId("user1");;
         request.setText("This is a sample post text");
         request.setTitle("Delicious Pancakes");
-        request.setAuthor_id("user1");
         request.setDescription("A simple pancake recipe for breakfast");
         request.setIngredients(List.of(new IngredientDto("Flour", "100g"), new IngredientDto("Milk", "200ml")));
         request.setSteps(List.of(new StepDto(1, "Mix ingredients", ""), new StepDto(2, "Cook on pan", "")));
@@ -112,9 +103,6 @@ public class PostControllerTest {
         request.setDifficulty("Easy");
         request.setPrep_time(15);
         request.setCalories(250);
-        request.setRatings(List.of(new RatingDto("user2", 5)));
-        request.setViews(0);
-        request.setCreated_at(LocalDateTime.now());
 
         PostRecipe updatedPost = new PostRecipe();
         updatedPost.setId("post1");

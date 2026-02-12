@@ -195,11 +195,7 @@ public class PostRecipeService {
 
     public PostRecipe createPost(CreatePostRequest createPostRequest){
         System.out.println("Hit");
-<<<<<<< HEAD
-        createPostRequest.setViews(0);
-        createPostRequest.setCreated_at(LocalDateTime.now());
-=======
->>>>>>> 9cf1eb9 (favorite post logic and CreatePostRequest dto fixed)
+
         PostRecipe post = modelMapper.map(createPostRequest, PostRecipe.class);
 
         log.debug("Created post body {}", post);
@@ -223,46 +219,6 @@ public class PostRecipeService {
         Optional.ofNullable(req.getDescription()).ifPresent(existingPost::setDescription);
         Optional.ofNullable(req.getCuisine()).ifPresent(existingPost::setCuisine);
         Optional.ofNullable(req.getDifficulty()).ifPresent(existingPost::setDifficulty);
-
-<<<<<<< HEAD
-        Optional.ofNullable(req.getTags()).ifPresent(existingPost::setTags);
-        Optional.ofNullable(req.getAllergies()).ifPresent(existingPost::setAllergies);
-
-        if (req.getIngredients() != null) {
-            List<Ingredient> ingredients = req.getIngredients().stream()
-                    .map(dto -> new Ingredient(dto.getName(), dto.getQuantity()))
-                    .toList();
-            existingPost.setIngredients(ingredients);
-        }
-
-        if (req.getSteps() != null) {
-            List<Step> steps = req.getSteps().stream()
-                    .map(dto -> new Step(
-                            dto.getStepNumber(),
-                            dto.getInstruction(),
-                            dto.getMedia()))
-                    .toList();
-            existingPost.setSteps(steps);
-        }
-
-       
-
-        // Numbers (primitive handling)
-        if (req.getPrep_time() != 0)
-            existingPost.setPrep_time(req.getPrep_time());
-
-        if (req.getCalories() != 0)
-            existingPost.setCalories(req.getCalories());
-
-        if (req.getViews() != 0)
-            existingPost.setViews(req.getViews());
-
-        Optional.ofNullable(req.getCreated_at())
-                .ifPresent(existingPost::setCreated_at);
-=======
-
-        Optional.ofNullable(createPostRequest.getText()).ifPresent(existingPost::setText);
->>>>>>> 9cf1eb9 (favorite post logic and CreatePostRequest dto fixed)
 
         log.debug("Post body {}", existingPost);
         log.info("Post updated successfully");

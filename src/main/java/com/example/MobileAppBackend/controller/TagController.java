@@ -3,6 +3,7 @@ package com.example.MobileAppBackend.controller;
 import com.example.MobileAppBackend.dto.model.TagDto;
 import com.example.MobileAppBackend.model.Tag;
 import com.example.MobileAppBackend.service.TagService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -26,7 +27,7 @@ public class TagController {
     }
 
     @PostMapping("/create")
-    public ResponseEntity<Tag> createTag(@RequestBody TagDto tagDto) {
+    public ResponseEntity<Tag> createTag(@RequestBody @Valid TagDto tagDto) {
         return ResponseEntity.ok(tagService.createTag(tagDto));
     }
 

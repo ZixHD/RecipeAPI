@@ -58,10 +58,5 @@ public class CreatePostRequest {
     @NotNull(message = "Recipe must have defined calories.")
     private int calories;
 
-<<<<<<< HEAD
-    private int views;
-    private LocalDateTime created_at;
-=======
->>>>>>> 9cf1eb9 (favorite post logic and CreatePostRequest dto fixed)
 
 }

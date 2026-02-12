@@ -1,10 +1,8 @@
 package com.example.MobileAppBackend.dto.model;
 
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.ToString;
+import jakarta.validation.constraints.NotBlank;
+import lombok.*;
 import lombok.extern.slf4j.Slf4j;
 
 @Data
@@ -15,5 +13,6 @@ import lombok.extern.slf4j.Slf4j;
 public class TagDto {
 
     private String id;
+    @NotBlank
     private String name;
 }

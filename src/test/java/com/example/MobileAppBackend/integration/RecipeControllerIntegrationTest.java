@@ -148,6 +148,123 @@ public class RecipeControllerIntegrationTest {
                 .andExpect(status().isBadRequest());
     }
 
+    @Test
+    void testGetAllRecipes_emptyDb_shouldReturnEmptyList() throws Exception {
+        User user = createUser();
+
+        mockMvc.perform(get("/api/recipes")
+                        .header("Authorization", authHeader(user)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.length()").value(0));
+    }
+
+    @Test
+    void testGetAllRecipes_noAuth_shouldReturnUnauthorized() throws Exception {
+        mockMvc.perform(get("/api/recipes"))
+                .andExpect(status().isForbidden());
+    }
+
+
+    @Test
+    void testIncludeUnknownField_shouldHandleGracefully() throws Exception {
+        User user = createUser();
+
+        PostRecipe r = new PostRecipe();
+        r.setTitle("Test");
+        postRepository.save(r);
+
+        mockMvc.perform(get("/api/recipes")
+                        .param("include", "unknownField")
+                        .header("Authorization", authHeader(user)))
+                .andExpect(status().isOk()); // or isBadRequest() if validated
+    }
+
+    @Test
+    void testExcludeAllFields_shouldReturnEmptyObjects() throws Exception {
+        User user = createUser();
+
+        PostRecipe r = new PostRecipe();
+        r.setTitle("Recipe");
+        r.setCuisine("Italian");
+        r.setText("Text");
+        postRepository.save(r);
+
+        mockMvc.perform(get("/api/recipes")
+                        .param("exclude", "title,cuisine,text")
+                        .header("Authorization", authHeader(user)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].title").doesNotExist())
+                .andExpect(jsonPath("$[0].cuisine").doesNotExist())
+                .andExpect(jsonPath("$[0].text").doesNotExist());
+    }
+
+    @Test
+    void testFilterRecipes_noMatches_shouldReturnEmptyList() throws Exception {
+        User user = createUser();
+
+        PostRecipe r = new PostRecipe();
+        r.setTitle("Meat Dish");
+        r.setCuisine("meat");
+        postRepository.save(r);
+
+        FilterRequest filter = new FilterRequest();
+        filter.setCuisine("vegan");
+
+        mockMvc.perform(post("/api/recipes/filter")
+                        .header("Authorization", authHeader(user))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(filter)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.length()").value(0));
+    }
+
+    @Test
+    void testFilterRecipes_nullBody_shouldFail() throws Exception {
+        User user = createUser();
+
+        mockMvc.perform(post("/api/recipes/filter")
+                        .header("Authorization", authHeader(user))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(""))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void testIncludeLargeFieldList_shouldNotCrash() throws Exception {
+        User user = createUser();
+
+        PostRecipe r = new PostRecipe();
+        r.setTitle("Test");
+        postRepository.save(r);
+
+        mockMvc.perform(get("/api/recipes")
+                        .param("include", "title,cuisine,text,authorId,allergies,random1,random2")
+                        .header("Authorization", authHeader(user)))
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    void testFilterCaseSensitivity() throws Exception {
+        User user = createUser();
+
+        PostRecipe r = new PostRecipe();
+        r.setTitle("Vegan Dish");
+        r.setCuisine("vegan");
+        postRepository.save(r);
+
+        FilterRequest filter = new FilterRequest();
+        filter.setCuisine("VEGAN");
+
+        mockMvc.perform(post("/api/recipes/filter")
+                        .header("Authorization", authHeader(user))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(filter)))
+                .andExpect(status().isOk());
+    }
+
+
+
+
     // izmisljam malo testove, sa edgecasevima sta vraca
     @Test
     void testFilterRecipes_success() throws Exception {
