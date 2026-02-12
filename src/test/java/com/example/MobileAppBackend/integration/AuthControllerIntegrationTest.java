@@ -79,6 +79,150 @@ public class AuthControllerIntegrationTest {
     }
 
     @Test
+    void testRegisterUser_missingFields_shouldFail() throws Exception {
+        RegisterRequest request = new RegisterRequest();
+        request.setEmail(null);
+        request.setUsername(null);
+        request.setPassword(null);
+
+        mockMvc.perform(post("/auth/register")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().is4xxClientError());
+    }
+
+    @Test
+    void testRegisterUser_weakPassword_shouldFail() throws Exception {
+        RegisterRequest request = new RegisterRequest();
+        request.setEmail("weak@example.com");
+        request.setUsername("weakuser");
+        request.setPassword("1");
+
+        mockMvc.perform(post("/auth/register")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void testRegisterUser_invalidEmail_shouldFail() throws Exception {
+        RegisterRequest request = new RegisterRequest();
+        request.setEmail("not-an-email");
+        request.setUsername("user");
+        request.setPassword("Password123");
+
+        mockMvc.perform(post("/auth/register")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void testLogin_wrongPassword_shouldFail() throws Exception {
+        User user = new User();
+        user.setEmail("user@example.com");
+        user.setUsername("user");
+        user.setUserType(UserType.USER);
+        user.setPassword(passwordEncoder.encode("CorrectPass123"));
+        userRepository.save(user);
+
+        LoginRequest loginRequest = new LoginRequest();
+        loginRequest.setEmail("user@example.com");
+        loginRequest.setPassword("WrongPass");
+
+        mockMvc.perform(post("/auth/login")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(loginRequest)))
+                .andExpect(status().is4xxClientError());
+    }
+
+    @Test
+    void testLogin_userNotFound_shouldFail() throws Exception {
+        LoginRequest loginRequest = new LoginRequest();
+        loginRequest.setEmail("nouser@example.com");
+        loginRequest.setPassword("Password123");
+
+        mockMvc.perform(post("/auth/login")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(loginRequest)))
+                .andExpect(status().is4xxClientError());
+    }
+
+    @Test
+    void testLogin_emptyBody_shouldFail() throws Exception {
+        mockMvc.perform(post("/auth/login")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(""))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void testClientRegister_duplicateEmail_shouldFail() throws Exception {
+        User existing = new User();
+        existing.setEmail("clientdup@example.com");
+        existing.setUsername("dup");
+        existing.setPassword("pw");
+        existing.setUserType(UserType.CLIENT);
+        userRepository.save(existing);
+
+        ClientRegisterRequestDto dto = new ClientRegisterRequestDto();
+        dto.setEmail("clientdup@example.com");
+        dto.setUsername("newclient");
+        dto.setPassword("Password123");
+
+        mockMvc.perform(post("/auth/client/register")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(dto)))
+                .andExpect(status().is4xxClientError());
+    }
+
+    @Test
+    void testRegister_extremelyLongInput() throws Exception {
+        RegisterRequest request = new RegisterRequest();
+        request.setEmail("a".repeat(200) + "@test.com");
+        request.setUsername("u".repeat(200));
+        request.setPassword("Password123");
+
+        mockMvc.perform(post("/auth/register")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().is4xxClientError());
+    }
+
+    @Test
+    void testRegister_specialCharacters() throws Exception {
+        RegisterRequest request = new RegisterRequest();
+        request.setEmail("test@test.com");
+        request.setUsername("<script>alert(1)</script>");
+        request.setPassword("Password123");
+
+        mockMvc.perform(post("/auth/register")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    void testRegister_emailCaseInsensitiveDuplicate() throws Exception {
+        User existing = new User();
+        existing.setEmail("case@test.com");
+        existing.setUsername("user1");
+        existing.setPassword("pw");
+        existing.setUserType(UserType.USER);
+        userRepository.save(existing);
+
+        RegisterRequest request = new RegisterRequest();
+        request.setEmail("CASE@test.com");
+        request.setUsername("user2");
+        request.setPassword("Password123");
+
+        mockMvc.perform(post("/auth/register")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().is2xxSuccessful());
+    }
+
+    @Test
     void testClientRegister_success() throws Exception {
         ClientRegisterRequestDto requestDto = new ClientRegisterRequestDto();
         requestDto.setEmail("client@example.com");

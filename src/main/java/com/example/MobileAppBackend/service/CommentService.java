@@ -24,6 +24,11 @@ public class CommentService {
     private final ModelMapper modelMapper;
 
     public Comment createComment(CreateCommentRequest createCommentRequest) {
+        if(!createCommentRequest.getAuthorId().equals(getCurrentUserId())) {
+            log.error("You are not allowed to edit this comment");
+            throw new RuntimeException("You are not allowed to edit this comment");
+        }
+
         Comment comment = modelMapper.map(createCommentRequest, Comment.class);
         log.debug("New comment created: {}", comment);
         log.info("New comment created");

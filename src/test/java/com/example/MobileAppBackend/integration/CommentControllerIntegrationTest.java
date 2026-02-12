@@ -45,9 +45,143 @@ public class CommentControllerIntegrationTest {
         commentRepository.deleteAll();
         userRepository.deleteAll();
     }
+    private User createUser() {
+        User user = new User();
+        user.setUsername("user" + System.nanoTime());
+        user.setEmail("u" + System.nanoTime() + "@test.com");
+        user.setPassword("pw");
+        user.setUserType(UserType.USER);
+        return userRepository.save(user);
+    }
 
     private String authHeader(User user) {
         return "Bearer " + jwtService.generateToken(user.getId(), user.getUsername());
+    }
+
+    @Test
+    void testCreateComment_missingText_shouldFail() throws Exception {
+        User user = createUser();
+
+        CreateCommentRequest request = new CreateCommentRequest();
+        request.setAuthorId(user.getId());
+        request.setPostId("post123");
+        request.setText(null);
+
+        mockMvc.perform(post("/api/comments/create")
+                        .header("Authorization", authHeader(user))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void testCreateComment_noAuth_shouldReturnError() throws Exception {
+        CreateCommentRequest request = new CreateCommentRequest();
+        request.setAuthorId("x");
+        request.setPostId("p");
+        request.setText("hello");
+
+        mockMvc.perform(post("/api/comments/create")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().is4xxClientError());
+    }
+
+    @Test
+    void testEditComment_notFound_shouldReturnError() throws Exception {
+        User user = createUser();
+
+        CreateCommentRequest editRequest = new CreateCommentRequest();
+        editRequest.setAuthorId(user.getId());
+        editRequest.setPostId("post1");
+        editRequest.setText("Updated");
+
+        mockMvc.perform(put("/api/comments/edit/nonexistent")
+                        .header("Authorization", authHeader(user))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(editRequest)))
+                .andExpect(status().is4xxClientError());
+    }
+
+    @Test
+    void testDeleteComment_notFound_shouldReturnError() throws Exception {
+        User user = createUser();
+
+        mockMvc.perform(delete("/api/comments/nonexistent")
+                        .header("Authorization", authHeader(user)))
+                .andExpect(status().is4xxClientError());
+    }
+
+    @Test
+    void testGetUserComments_empty_shouldReturnEmptyList() throws Exception {
+        User user = createUser();
+
+        mockMvc.perform(get("/api/comments/user/" + user.getId())
+                        .header("Authorization", authHeader(user)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.length()").value(0));
+    }
+
+    @Test
+    void testCreateComment_veryLongText_lessThanLimit() throws Exception {
+        User user = createUser();
+
+        String longText = "a".repeat(100);
+
+        CreateCommentRequest request = new CreateCommentRequest();
+        request.setAuthorId(user.getId());
+        request.setPostId("post123");
+        request.setText(longText);
+
+        mockMvc.perform(post("/api/comments/create")
+                        .header("Authorization", authHeader(user))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    void testCreateComment_xssInput() throws Exception {
+        User user = createUser();
+
+        CreateCommentRequest request = new CreateCommentRequest();
+        request.setAuthorId(user.getId());
+        request.setPostId("post123");
+        request.setText("<script>alert('xss')</script>");
+
+        mockMvc.perform(post("/api/comments/create")
+                        .header("Authorization", authHeader(user))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    void testCreateComment_authorSpoofing_shouldFail() throws Exception {
+        User realUser = createUser();
+        User otherUser = createUser();
+
+        CreateCommentRequest request = new CreateCommentRequest();
+        request.setAuthorId(otherUser.getId());
+        request.setPostId("post123");
+        request.setText("Spoofed");
+
+        mockMvc.perform(post("/api/comments/create")
+                        .header("Authorization", authHeader(realUser))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().is4xxClientError());
+    }
+
+    @Test
+    void testCreateComment_emptyBody_shouldFail() throws Exception {
+        User user = createUser();
+
+        mockMvc.perform(post("/api/comments/create")
+                        .header("Authorization", authHeader(user))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(""))
+                .andExpect(status().isBadRequest());
     }
 
     @Test

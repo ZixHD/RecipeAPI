@@ -6,6 +6,7 @@ import com.example.MobileAppBackend.dto.authentication.client.ClientRegisterResp
 import com.example.MobileAppBackend.dto.authentication.user.LoginRequest;
 import com.example.MobileAppBackend.dto.authentication.user.RegisterRequest;
 import com.example.MobileAppBackend.service.AuthService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -22,13 +23,13 @@ public class AuthController {
     private final AuthService authService;
 
     @PostMapping("/register")
-    public ResponseEntity<?> register(@RequestBody RegisterRequest registerRequest) {
+    public ResponseEntity<?> register(@RequestBody @Valid RegisterRequest registerRequest) {
         this.authService.register(registerRequest);
         return ResponseEntity.ok().build();
     }
 
     @PostMapping("/client/register")
-    public ResponseEntity<ClientRegisterResponseDto> clientRegister(@RequestBody ClientRegisterRequestDto clientRegisterRequestDto) {
+    public ResponseEntity<ClientRegisterResponseDto> clientRegister(@RequestBody @Valid ClientRegisterRequestDto clientRegisterRequestDto) {
         ClientRegisterResponseDto responseDto = this.authService.clientRegister(clientRegisterRequestDto);
         return ResponseEntity.status(HttpStatus.CREATED).body(responseDto);
 

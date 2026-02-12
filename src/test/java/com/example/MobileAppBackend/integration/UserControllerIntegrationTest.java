@@ -38,7 +38,6 @@ public class UserControllerIntegrationTest {
         userRepository.deleteAll();
     }
 
-    // Helper method to generate Authorization header
     private String authHeader(User user) {
         return "Bearer " + jwtService.generateToken(user.getId(), user.getUsername());
     }
