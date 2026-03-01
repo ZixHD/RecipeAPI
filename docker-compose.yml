@@ -1,0 +1,16 @@
+
+services:
+  backend:
+    build: .
+    container_name: recipe-api
+    env_file:
+      - .env
+    ports:
+      - "8080:8080"
+    networks:
+      mynet:
+        ipv4_address: 172.25.0.10
+
+networks:
+  mynet:
+    external: true
