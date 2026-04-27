@@ -71,20 +71,20 @@ jobs:
         run: docker compose down
 
   deploy:
-    runs-on: self-hosted
+    runs-on: ubuntu-latest
     needs: test
 
     steps:
-      - name: Login to GHCR
-        run: echo "${{ secrets.GHCR_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+      - name: Deploy to LXC via SSH
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.DEPLOY_HOST }}
+          username: ${{ secrets.DEPLOY_USER }}
+          key: ${{ secrets.DEPLOY_SSH_KEY }}
+          script: |
+            cd /opt/recipe-api
 
-      - name: Pull latest image
-        run: docker pull ghcr.io/${{ github.repository }}/recipe-api:latest
+            echo "${{ secrets.GHCR_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
 
-      - name: Restart services with Docker Compose
-        run: |
-          IMAGE=ghcr.io/${{ github.repository }}/recipe-api:latest \
-          docker compose down
-          
-          IMAGE=ghcr.io/${{ github.repository }}/recipe-api:latest \
-          docker compose up -d
+            docker compose pull
+            docker compose up -d
