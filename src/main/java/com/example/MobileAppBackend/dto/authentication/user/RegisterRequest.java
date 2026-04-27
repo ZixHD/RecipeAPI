@@ -15,7 +15,6 @@ import lombok.extern.slf4j.Slf4j;
 @NoArgsConstructor
 @AllArgsConstructor
 @ToString
-@Slf4j
 public class RegisterRequest {
 
     @NotBlank
@@ -26,7 +25,5 @@ public class RegisterRequest {
     @Size(min = 3, max = 30)
     private String password;
 
-    @NotBlank
-    private String username;
 
 }

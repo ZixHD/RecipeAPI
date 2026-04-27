@@ -43,7 +43,6 @@ public class AuthService {
         User user = new User();
         user.setEmail(registerRequest.getEmail());
         user.setPassword(hashedPassword);
-        user.setUsername(registerRequest.getUsername());
         user.setUserType(UserType.USER);
 
         userRepository.save(user);

@@ -44,7 +44,6 @@ public class AuthControllerIntegrationTest {
     void testRegisterUser_success() throws Exception {
         RegisterRequest request = new RegisterRequest();
         request.setEmail("testuser@example.com");
-        request.setUsername("testuser");
         request.setPassword("Password123");
 
         mockMvc.perform(post("/auth/register")
@@ -82,7 +81,6 @@ public class AuthControllerIntegrationTest {
     void testRegisterUser_missingFields_shouldFail() throws Exception {
         RegisterRequest request = new RegisterRequest();
         request.setEmail(null);
-        request.setUsername(null);
         request.setPassword(null);
 
         mockMvc.perform(post("/auth/register")
@@ -95,7 +93,6 @@ public class AuthControllerIntegrationTest {
     void testRegisterUser_weakPassword_shouldFail() throws Exception {
         RegisterRequest request = new RegisterRequest();
         request.setEmail("weak@example.com");
-        request.setUsername("weakuser");
         request.setPassword("1");
 
         mockMvc.perform(post("/auth/register")
@@ -108,7 +105,6 @@ public class AuthControllerIntegrationTest {
     void testRegisterUser_invalidEmail_shouldFail() throws Exception {
         RegisterRequest request = new RegisterRequest();
         request.setEmail("not-an-email");
-        request.setUsername("user");
         request.setPassword("Password123");
 
         mockMvc.perform(post("/auth/register")
@@ -180,7 +176,6 @@ public class AuthControllerIntegrationTest {
     void testRegister_extremelyLongInput() throws Exception {
         RegisterRequest request = new RegisterRequest();
         request.setEmail("a".repeat(200) + "@test.com");
-        request.setUsername("u".repeat(200));
         request.setPassword("Password123");
 
         mockMvc.perform(post("/auth/register")
@@ -193,7 +188,6 @@ public class AuthControllerIntegrationTest {
     void testRegister_specialCharacters() throws Exception {
         RegisterRequest request = new RegisterRequest();
         request.setEmail("test@test.com");
-        request.setUsername("<script>alert(1)</script>");
         request.setPassword("Password123");
 
         mockMvc.perform(post("/auth/register")
@@ -213,7 +207,6 @@ public class AuthControllerIntegrationTest {
 
         RegisterRequest request = new RegisterRequest();
         request.setEmail("CASE@test.com");
-        request.setUsername("user2");
         request.setPassword("Password123");
 
         mockMvc.perform(post("/auth/register")
@@ -249,7 +242,6 @@ public class AuthControllerIntegrationTest {
 
         RegisterRequest request = new RegisterRequest();
         request.setEmail("duplicate@example.com");
-        request.setUsername("newuser");
         request.setPassword("Password123");
 
         mockMvc.perform(post("/auth/register")

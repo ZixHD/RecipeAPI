@@ -49,7 +49,6 @@ class AuthServiceTest {
         RegisterRequest req = new RegisterRequest();
         req.setEmail("a@test.com");
         req.setPassword("123");
-        req.setUsername("user");
 
         when(userRepository.findByEmail("a@test.com")).thenReturn(Optional.empty());
         when(passwordEncoder.encode("123")).thenReturn("hashed");
@@ -62,7 +61,6 @@ class AuthServiceTest {
         User saved = captor.getValue();
         assertEquals("a@test.com", saved.getEmail());
         assertEquals("hashed", saved.getPassword());
-        assertEquals("user", saved.getUsername());
         assertEquals(UserType.USER, saved.getUserType());
     }
 

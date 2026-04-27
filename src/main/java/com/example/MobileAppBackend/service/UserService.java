@@ -76,6 +76,7 @@ public class UserService {
         return this.userRepository.findAll();
     }
 
+
     public void deleteUser(String user_id){
        Optional<User> optionalUser = userRepository.findById(user_id);
        User user = optionalUser.get();
