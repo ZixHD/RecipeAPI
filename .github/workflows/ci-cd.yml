@@ -78,9 +78,9 @@ jobs:
       - name: Deploy to LXC via SSH
         uses: appleboy/ssh-action@v1.0.3
         with:
-          host: ${{ secrets.DEPLOY_HOST }}
-          username: ${{ secrets.DEPLOY_USER }}
-          key: ${{ secrets.DEPLOY_SSH_KEY }}
+          host: ${{ secrets.HOMELAB_HOST }}
+          username: ${{ secrets.HOMELAB_USERNAME }}
+          key: ${{ secrets.HOMELAB_SSH_KEY }}
           script: |
             cd /opt/recipe-api
 
