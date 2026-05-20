@@ -26,4 +26,10 @@ public class ConfigController {
     public ResponseEntity<String> versionCheck() {
         return ResponseEntity.ok("Version: " + appVersion);
     }
+
+
+    @GetMapping("/test")
+    public ResponseEntity<String> versionTestCheck() {
+        return ResponseEntity.ok("Version_TEST: " + appVersion);
+    }
 }
