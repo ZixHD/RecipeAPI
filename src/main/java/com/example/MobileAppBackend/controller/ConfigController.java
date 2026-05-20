@@ -15,7 +15,7 @@ public class ConfigController {
     @Value("${APP_VERSION:dev}")
     private String appVersion;
 
-    @GetMapping("/health-check")
+    @GetMapping("/health-che")
     public ResponseEntity<Map<String, String>> healthCheck() {
         return ResponseEntity.ok(
                 Map.of("status", "UP")
