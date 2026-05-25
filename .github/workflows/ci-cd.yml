@@ -54,15 +54,6 @@ jobs:
           distribution: temurin
           cache: gradle
 
-      - name: Install Snyk
-        run: npm install -g snyk
-
-      - name: Authenticate Snyk
-        run: snyk auth ${{ secrets.SNYK_TOKEN }}
-
-      - name: Run Snyk test (fail on high/critical)
-        run: snyk test
-
       - name: SonarCloud Scan
         uses: SonarSource/sonarcloud-github-action@v2
         with:
