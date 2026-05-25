@@ -61,7 +61,7 @@ jobs:
         run: snyk auth ${{ secrets.SNYK_TOKEN }}
 
       - name: Run Snyk test (fail on high/critical)
-        run: snyk test --severity-threshold=high
+        run: snyk test
 
       - name: SonarCloud Scan
         uses: SonarSource/sonarcloud-github-action@v2
