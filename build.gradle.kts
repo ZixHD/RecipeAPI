@@ -6,10 +6,17 @@ plugins {
 
 group = "com.example"
 version = "0.0.1-SNAPSHOT"
+description = "Demo project for Spring Boot"
 
 java {
     toolchain {
         languageVersion.set(JavaLanguageVersion.of(17))
+    }
+}
+
+configurations {
+    compileOnly {
+        extendsFrom(configurations.annotationProcessor.get())
     }
 }
 
@@ -19,38 +26,38 @@ repositories {
 
 dependencies {
 
-    // Web + API
-    implementation("org.springframework.boot:spring-boot-starter-web")
-
-    // MongoDB
     implementation("org.springframework.boot:spring-boot-starter-data-mongodb")
-
-    // Security
+    implementation("org.springframework.boot:spring-boot-starter-restclient")
     implementation("org.springframework.boot:spring-boot-starter-security")
-
-    // Redis
     implementation("org.springframework.boot:spring-boot-starter-data-redis")
 
-    // Validation
-    implementation("org.springframework.boot:spring-boot-starter-validation")
+    implementation("io.github.cdimascio:dotenv-java:3.0.0")
+    implementation("org.springframework.boot:spring-boot-starter-webmvc")
 
-    // JWT
     implementation("io.jsonwebtoken:jjwt-api:0.11.5")
     runtimeOnly("io.jsonwebtoken:jjwt-impl:0.11.5")
     runtimeOnly("io.jsonwebtoken:jjwt-jackson:0.11.5")
 
-    // Utils
     implementation("org.modelmapper:modelmapper:3.1.1")
-    implementation("io.github.cdimascio:dotenv-java:3.0.0")
+    implementation("javax.validation:validation-api:2.0.1.Final")
+    implementation("org.springframework.boot:spring-boot-starter-validation")
 
-    // Lombok
     compileOnly("org.projectlombok:lombok")
     annotationProcessor("org.projectlombok:lombok")
 
-    // Actuator (metrics)
+    testImplementation("org.springframework.boot:spring-boot-starter-restclient-test")
+    testImplementation("org.springframework.boot:spring-boot-starter-security-test")
+    testImplementation("org.springframework.boot:spring-boot-starter-webmvc-test")
+    testImplementation("org.springframework.boot:spring-boot-starter-test")
+    testImplementation("org.mockito:mockito-core")
+
+    testRuntimeOnly("org.junit.platform:junit-platform-launcher")
+
+    // METRICS
     implementation("org.springframework.boot:spring-boot-starter-actuator")
     implementation("io.micrometer:micrometer-registry-prometheus")
+}
 
-    // Tests
-    testImplementation("org.springframework.boot:spring-boot-starter-test")
+tasks.named<Test>("test") {
+    useJUnitPlatform()
 }
