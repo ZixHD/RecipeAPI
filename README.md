@@ -53,11 +53,14 @@ Project/
 │       └── java/                # Unit i integracioni testovi
 │
 ├── Dockerfile
-├── docker-compose.yml
+├── docker-compose.dev.yml
+├── docker-compose.prod.yml
+├── prometheus.yml
 ├── build.gradle
 ├── gradlew
 ├── gradlew.bat
-└── .env
+├── .env
+└── .env.example
 ```
 
 Layer Design
