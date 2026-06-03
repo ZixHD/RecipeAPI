@@ -36,20 +36,27 @@ Tech stack
 ```
 Project/
 │
-├── src/main/java/
-│   ├── config/          # Security, JWT, and configuration classes
-│   ├── controller/      # REST controllers
-│   ├── service/         # Business logic layer
-│   ├── repository/      # MongoDB repositories
-│   ├── model/           # Domain models
-│   └── dto/             # Data transfer objects
-│
-├── src/main/resources/
-│   └── application.properties
+├── src/
+│   ├── main/
+│   │   ├── java/
+│   │   │   ├── config/          # Security i konfiguracione klase
+│   │   │   ├── controller/      # REST kontroleri
+│   │   │   ├── service/         # Poslovna logika
+│   │   │   ├── repository/      # MongoDB repozitorijumi
+│   │   │   ├── model/           # Domenski modeli
+│   │   │   └── dto/             # DTO objekti
+│   │   │
+│   │   └── resources/
+│   │       └── application.properties
+│   │
+│   └── test/
+│       └── java/                # Unit i integracioni testovi
 │
 ├── Dockerfile
 ├── docker-compose.yml
-├── build_and_run.sh
+├── build.gradle
+├── gradlew
+├── gradlew.bat
 └── .env
 ```
 
